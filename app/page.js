@@ -1,80 +1,44 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ethers } from 'ethers';
 import axios from 'axios';
 import Web3Modal from 'web3modal';
+import { providers } from 'ethers';
 
-import { energyMarketAddress } from '../config';
+import { energyMarketAddress, webSocketURL } from '../config';
 // import EnergyMarketPlace from '../artifacts/contracts/EnergyMarketplace.sol/EnergyMarketplace.json';
-import NFTMarketplace from '../artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json';
+import EnergyMarketPlace from '../artifacts/contracts/EnergyMarketPlace.sol/EnergyMarketPlace.json';
 
 export default function Home() {
-	const [nfts, setNfts] = useState([]);
-	const [loadingState, setLoadingState] = useState(true);
+	const [energyTokens, setEnergyTokens] = useState([]);
+	const [loading, setLoading] = useState(false);
+	const [data, setData] = useState(null);
+
+	const [socketConnection, setSocketConnection] = useState(null);
+	// init web socket
+	const ws = new WebSocket(webSocketURL);
 	useEffect(() => {
-		loadNFTs();
-	}, []);
-	async function loadNFTs() {
-		/* create a generic provider and query for unsold market items */
-		const provider = new ethers.providers.JsonRpcProvider();
-		const contract = new ethers.Contract(
-			marketplaceAddress,
-			NFTMarketplace.abi,
-			provider
-		);
-		const data = await contract.fetchMarketItems();
-
-		/*
-		 *  map over items returned from smart contract and format
-		 *  them as well as fetch their token metadata
-		 */
-		const items = await Promise.all(
-			data.map(async (i) => {
-				const tokenUri = await contract.tokenURI(i.tokenId);
-				const meta = await axios.get(tokenUri);
-				let price = ethers.utils.formatUnits(i.price.toString(), 'ether');
-				let item = {
-					price,
-					tokenId: i.tokenId.toNumber(),
-					seller: i.seller,
-					owner: i.owner,
-					image: meta.data.image,
-					name: meta.data.name,
-					description: meta.data.description,
-				};
-				return item;
-			})
-		);
-		setNfts(items);
-		setLoadingState('true');
-	}
-	async function buyNft(nft) {
-		/* needs the user to sign the transaction, so will use Web3Provider and sign it */
-		const web3Modal = new Web3Modal();
-		const connection = await web3Modal.connect();
-		const provider = new ethers.providers.Web3Provider(connection);
-		const signer = provider.getSigner();
-		const contract = new ethers.Contract(
-			marketplaceAddress,
-			NFTMarketplace.abi,
-			signer
-		);
-
-		/* user will be prompted to pay the asking proces to complete the transaction */
-		const price = ethers.utils.parseUnits(nft.price.toString(), 'ether');
-		const transaction = await contract.createMarketSale(nft.tokenId, {
-			value: price,
-		});
-		await transaction.wait();
-		loadNFTs();
-	}
-
-	useEffect(() => {
-		loadNFTs();
+		ws.onopen = () => {
+			console.log('WebSocket connected');
+			console.log(ws);
+			setSocketConnection(ws);
+		};
+		ws.onmessage = (message) => {
+			const data = JSON.parse(message.data);
+			console.log(data);
+			setData(data);
+		};
+		return () => {
+			ws.close();
+		};
 	}, []);
 
-	if (loadingState) {
+	const sendData = (data) => {
+		socketConnection.send(JSON.stringify({ activateRelays: data }));
+	};
+
+	if (loading) {
 		return (
 			<main className='flex flex-col items-center justify-between min-h-screen p-24'>
 				<div>
@@ -87,8 +51,10 @@ export default function Home() {
 	return (
 		<main className='flex flex-col items-center justify-between min-h-screen p-24'>
 			<div>
-				<p>{JSON.stringify(nfts)}</p>
+				<button onClick={() => sendData('0000')}>on</button>
+				<button onClick={() => sendData('1111')}>turnOff</button>
 			</div>
+			<div>{}</div>
 		</main>
 	);
 }

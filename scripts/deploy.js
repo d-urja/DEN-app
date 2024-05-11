@@ -1,13 +1,15 @@
 const hre = require('hardhat');
 
 async function main() {
-	const EnergyMarketPlace = await hre.ethers.getContractFactory(
-		'EnergyMarketPlace'
+	// const EnergyMarketPlace = await hre.ethers.getContractFactory(
+	// 	'EnergyMarketplace'
+	// );
+	const energyMarketplace = await hre.ethers.deployContract(
+		'EnergyMarketplace'
 	);
-	const energyMarketPlace = await EnergyMarketPlace.deploy();
-	await energyMarketPlace.waitForDeployment();
-	console.log(energyMarketPlace);
-	console.log('EnergyMarketplace deployed to:', energyMarketPlace.target);
+	await energyMarketplace.waitForDeployment();
+	console.log(energyMarketplace);
+	console.log('EnergyMarketplace deployed to:', energyMarketplace.target);
 }
 
 main()
