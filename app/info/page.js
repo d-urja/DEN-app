@@ -33,7 +33,7 @@ export default function InfoPage() {
 				<p>Sensors not detected</p>
 			) : (
 				<div>
-					<p>Sensors connection successfull</p>
+					<p>Sensors connection successful</p>
 					<p>{JSON.stringify(data, null, 2)}</p>
 					<div>{data && <pre>{JSON.stringify(data, null, 2)}</pre>}</div>
 					<div className='w-full h-32'>
