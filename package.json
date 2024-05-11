@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^4.9.3",
     "axios": "^1.6.8",
     "ethers": "^6.12.1",
     "next": "14.2.3",
