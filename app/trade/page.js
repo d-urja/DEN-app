@@ -7,7 +7,7 @@ import Web3Modal from 'web3modal';
 
 import { energyMarketAddress } from '../../config';
 
-import EnergyMarketPlace from '../../artifacts/contracts/EnergyMarketplace.sol/EnergyMarketplace.json';
+// import EnergyMarketPlace from '../../artifacts/contracts/EnergyMarketplace.sol/EnergyMarketplace.json';
 
 export default function CreateItem() {
 	const [formInput, updateFormInput] = useState({
@@ -25,7 +25,7 @@ export default function CreateItem() {
 		// Connect to the Ethereum network via Web3Modal
 		const web3Modal = new Web3Modal();
 		const connection = await web3Modal.connect();
-		const provider = new ethers.providers.Web3Provider(connection);
+		const provider = new ethers.BrowserProvider(connection);
 		const signer = provider.getSigner();
 
 		// Deploy or connect to your EnergyMarketplace contract
@@ -50,11 +50,11 @@ export default function CreateItem() {
 	async function listForSale() {
 		const web3Modal = new Web3Modal();
 		const connection = await web3Modal.connect();
-		const provider = new ethers.providers.Web3Provider(connection);
+		const provider = new ethers.BrowserProvider(connection);
 		const signer = provider.getSigner();
 
 		/* next, create the item */
-		const price = ethers.utils.parseUnits(formInput.price, 'ether');
+		const price = ethers.parseUnits(formInput.price, 'ether');
 		let contract = new ethers.Contract(
 			energyMarketAddress,
 			EnergyMarketPlace.abi,
@@ -73,14 +73,18 @@ export default function CreateItem() {
 	return (
 		<div className='flex flex-col items-center justify-center mt-28 item-center'>
 			{/* display the potential suppliers */}
-			<div className='flex items-center justify-center w-full'>
+			<div className='flex flex-col items-center justify-center w-full gap-4'>
+				{/* listed trades */}
+				<h1 className='text-xl font-semibold'>Listed Trades</h1>
 				{/* Current Trades */}
 				<div className='flex items-center justify-between w-1/2 p-2 text-black bg-white border border-gray-300 rounded-lg'>
 					<div className='w-[80%]'>
 						<h2>User1</h2>
 					</div>
-					<div className='flex'>
-						<input className='w-8 p-2 mr-4 border border-gray-300 rounded-lg'></input>
+					<div className='flex items-center'>
+						<div className='mr-8'>
+							<p className='text-gray-500'>10</p>
+						</div>
 						<div className='flex items-center text-center rounded-lg'>
 							<button className='w-full px-5 py-2 text-white bg-red-500 rounded-lg'>
 								Sell
@@ -88,35 +92,74 @@ export default function CreateItem() {
 						</div>
 					</div>
 				</div>
+				<div className='flex items-center justify-between w-1/2 p-2 text-black bg-white border border-gray-300 rounded-lg'>
+					<div className='w-[80%]'>
+						<h2>User2</h2>
+					</div>
+					<div className='flex items-center'>
+						<div className='mr-8'>
+							<p className='text-gray-500'>15</p>
+						</div>
+						<div className='flex items-center text-center rounded-lg'>
+							<button className='w-full px-5 py-2 text-white bg-green-500 rounded-lg'>
+								Buy
+							</button>
+						</div>
+					</div>
+				</div>
+				<div className='flex items-center justify-between w-1/2 p-2 text-black bg-white border border-gray-300 rounded-lg'>
+					<div className='w-[80%]'>
+						<h2>User3</h2>
+					</div>
+					<div className='flex items-center'>
+						<div className='mr-8'>
+							<p className='text-gray-500'>12</p>
+						</div>
+						<div className='flex items-center text-center rounded-lg'>
+							<button className='w-full px-5 py-2 text-white bg-green-500 rounded-lg'>
+								Buy
+							</button>
+						</div>
+					</div>
+				</div>
 			</div>
+			{/* forms */}
+			<h1 className='mt-8 text-xl font-semibold'>Place an order</h1>
+
 			<div className='flex flex-col w-1/2 pb-12 dark:text-black'>
 				<input
-					placeholder='Asset Name'
+					placeholder='Token Id'
 					className='p-4 mt-8 border rounded'
 					onChange={(e) =>
 						updateFormInput({ ...formInput, name: e.target.value })
 					}
 				/>
-				<textarea
-					placeholder='Asset Description'
+				<input
+					placeholder='Energy Price in Eth'
 					className='p-4 mt-2 border rounded'
+					type='number'
 					onChange={(e) =>
 						updateFormInput({ ...formInput, description: e.target.value })
 					}
 				/>
 				<input
-					placeholder='Asset Price in Eth'
+					placeholder='Energy Type'
 					className='p-4 mt-2 border rounded'
 					onChange={(e) =>
 						updateFormInput({ ...formInput, price: e.target.value })
 					}
 				/>
-				<button
-					onClick={listForSale}
-					className='p-4 mt-4 font-bold text-white bg-pink-500 rounded shadow-lg'
-				>
-					Sell
-				</button>
+				<div className='flex w-full gap-4'>
+					<button
+						onClick={mintEnergy}
+						className='flex-1 p-4 mt-4 font-bold text-white bg-green-500 rounded-lg shadow-lg'
+					>
+						Buy
+					</button>
+					<button className='flex-1 p-4 mt-4 font-bold text-white bg-red-500 rounded-lg shadow-lg'>
+						Sell
+					</button>
+				</div>
 			</div>
 		</div>
 	);
